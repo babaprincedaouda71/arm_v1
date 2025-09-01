@@ -1,0 +1,29 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "http://localhost:3001"
+              - "http://192.168.1.9:3000"  # Ajout de l'IP pour mobile
+              - "http://192.168.1.12:3000"  # Ajout de l'IP pour mobile
+              - "http://192.168.1.*:3000"  # Optionnel: pattern pour toute la plage
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS  # Important pour les requêtes preflight
+            allow-credentials: true
+            maxAge: 3600  # Cache preflight requests

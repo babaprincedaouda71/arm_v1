@@ -1,0 +1,58 @@
+export const planGroupEvaluationData = [
+  {
+    number: "PG-001",
+    label: "Plan de groupe pour le module 1",
+    type: "Pré-formation",
+    creationDate: "2023-11-22",
+    status: "Publié",
+  },
+  {
+    number: "PG-002",
+    label: "Évaluation finale du module 2",
+    type: "Quizz final",
+    creationDate: "2023-12-05",
+    status: "Brouillon",
+  },
+  {
+    number: "PG-003",
+    label: "Plan de groupe pour le projet de groupe",
+    type: "Post-formation",
+    creationDate: "2024-01-10",
+    status: "Publié",
+  },
+  {
+    number: "PG-004",
+    label: "Évaluation du formateur pour le module 3",
+    type: "Eval-Formateur",
+    creationDate: "2024-02-15",
+    status: "Fermé",
+  },
+  {
+    number: "PG-005",
+    label: "Formulaire F4 pour le module 4",
+    type: "Formulaire F4",
+    creationDate: "2024-03-20",
+    status: "Auto",
+  },
+  {
+    number: "PG-006",
+    label: "Plan de groupe pour le module 5 (Auto-évaluation)",
+    type: "Pré-formation",
+    creationDate: "2024-04-25",
+    status: "Auto",
+  },
+  {
+    number: "PG-007",
+    label: "Évaluation finale du projet (Quizz)",
+    type: "Quizz final",
+    creationDate: "2024-05-30",
+    status: "Publié",
+  },
+  {
+    number: "PG-008",
+    label: "Plan de groupe pour le module 6 (Brouillon)",
+    type: "Post-formation",
+    creationDate: "2024-06-05",
+    status: "Brouillon",
+  },
+];

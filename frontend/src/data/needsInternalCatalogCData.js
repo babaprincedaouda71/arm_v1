@@ -1,0 +1,42 @@
+export const needsInternalCatalogCData = [
+  {
+    ref: "REF1",
+    domain: "Finance",
+    theme: "Comptabilité",
+    plan: "Plan1",
+    department: "Comptabilité",
+    type: "Besoin",
+  },
+  {
+    ref: "REF2",
+    domain: "Marketing",
+    theme: "Communication",
+    plan: "Plan2",
+    department: "Marketing",
+    type: "Amélioration",
+  },
+  {
+    ref: "REF3",
+    domain: "IT",
+    theme: "Sécurité",
+    plan: "Plan3",
+    department: "IT",
+    type: "Projet",
+  },
+  {
+    ref: "REF4",
+    domain: "RH",
+    theme: "Formation",
+    plan: "Plan4",
+    department: "Formation",
+    type: "Besoin",
+  },
+  {
+    ref: "REF5",
+    domain: "Production",
+    theme: "Qualité",
+    plan: "Plan5",
+    department: "Qualité",
+    type: "Amélioration",
+  },
+];

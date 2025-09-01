@@ -1,0 +1,102 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "fullName": "John Doe",
+      "group": "Admin",
+      "creationDate": "2023-01-01",
+      "status": "Actif"
+    },
+    {
+      "id": "2",
+      "fullName": "Jane Smith",
+      "group": "User",
+      "creationDate": "2023-02-15",
+      "status": "Inactif"
+    },
+    {
+      "id": "3",
+      "fullName": "Coulibaly Prince Baba Daouda",
+      "group": "Manager",
+      "creationDate": "2023-03-10",
+      "status": "Inactif"
+    },
+    {
+      "id": "4",
+      "fullName": "Emily Johnson",
+      "group": "Manager",
+      "creationDate": "2023-03-10",
+      "status": "Actif"
+    },
+    {
+      "id": "5",
+      "fullName": "David Lee",
+      "group": "Developer",
+      "creationDate": "2023-05-15",
+      "status": "Actif"
+    },
+    {
+      "id": "6",
+      "fullName": "Sarah Kim",
+      "group": "Designer",
+      "creationDate": "2022-11-28",
+      "status": "Inactif"
+    },
+    {
+      "id": "7",
+      "fullName": "Michael Brown",
+      "group": "Manager",
+      "creationDate": "2023-08-02",
+      "status": "Actif"
+    },
+    {
+      "id": "8",
+      "fullName": "Olivia Davis",
+      "group": "Developer",
+      "creationDate": "2023-01-12",
+      "status": "Actif"
+    },
+    {
+      "id": "9",
+      "fullName": "Daniel Wilson",
+      "group": "Designer",
+      "creationDate": "2022-09-20",
+      "status": "Actif"
+    },
+    {
+      "id": "10",
+      "fullName": "Emma Taylor",
+      "group": "Manager",
+      "creationDate": "2023-04-05",
+      "status": "Inactif"
+    },
+    {
+      "id": "11",
+      "fullName": "Benjamin Martin",
+      "group": "Developer",
+      "creationDate": "2023-07-18",
+      "status": "Actif"
+    },
+    {
+      "id": "12",
+      "fullName": "Sophia Hernandez",
+      "group": "Designer",
+      "creationDate": "2022-12-15",
+      "status": "Actif"
+    },
+    {
+      "id": "13",
+      "fullName": "William Jackson",
+      "group": "Manager",
+      "creationDate": "2023-02-25",
+      "status": "Actif"
+    },
+    {
+      "id": "14",
+      "fullName": "Ava Lee",
+      "group": "Developer",
+      "creationDate": "2023-06-10",
+      "status": "Inactif"
+    }
+  ]
+}

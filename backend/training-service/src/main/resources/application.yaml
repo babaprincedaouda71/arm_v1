@@ -1,0 +1,36 @@
+resilience4j:
+  circuitbreaker:
+    instances:
+      companyService: # Nom de l'instance du circuit breaker
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+      authService:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+  retry:
+    instances:
+      companyServiceRetry: # Nom de l'instance de retry
+        maxAttempts: 3
+        waitDuration: 1s
+      authServiceRetry:
+        maxAttempts: 10
+        waitDuration: 1s
+
+logging:
+  level:
+    org.springframework.cache: debug
+    com.github.benmanes.caffeine: debug
+
+# application.yml
+app:
+  batch:
+    size: 1000
+    timeout: 30s
+  auth-service:
+    timeout: 10s

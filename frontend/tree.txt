@@ -1,0 +1,644 @@
+.
+├── db.json
+├── Dockerfile
+├── jest.setup.js
+├── next-env.d.ts
+├── package.json
+├── package-lock.json
+├── pages
+│   ├── account-creation
+│   │   ├── activation-email
+│   │   │   └── index0.tsx
+│   │   ├── end-of-register
+│   │   │   └── index0.tsx
+│   │   ├── first-step
+│   │   │   └── index0.tsx
+│   │   ├── general-infos
+│   │   │   └── index0.tsx
+│   │   └── setting-password
+│   │       └── index0.tsx
+│   ├── admin
+│   ├── api
+│   │   └── hello.ts
+│   ├── _app.tsx
+│   ├── catalog
+│   │   ├── external
+│   │   │   └── index0.tsx
+│   │   └── internal
+│   │       ├── add
+│   │       │   └── index0.tsx
+│   │       └── index0.tsx
+│   ├── collaborator
+│   ├── dashboard
+│   │   └── index0.tsx
+│   ├── data
+│   │   └── index0.tsx
+│   ├── _document.tsx
+│   ├── evaluation
+│   │   ├── add
+│   │   │   └── index0.tsx
+│   │   └── index0.tsx
+│   ├── forgot-password
+│   │   └── index0.tsx
+│   ├── index0.tsx
+│   ├── individual-request
+│   │   └── index0.tsx
+│   ├── manager
+│   ├── Needs
+│   │   ├── evaluation
+│   │   │   ├── add
+│   │   │   │   └── index0.tsx
+│   │   │   └── index0.tsx
+│   │   ├── group
+│   │   │   ├── add-group
+│   │   │   │   └── index0.tsx
+│   │   │   ├── participants
+│   │   │   │   └── index0.tsx
+│   │   │   ├── planning
+│   │   │   │   └── index0.tsx
+│   │   │   └── providers
+│   │   │       └── index0.tsx
+│   │   ├── index0.tsx
+│   │   ├── individual-request
+│   │   │   ├── add
+│   │   │   │   └── index0.tsx
+│   │   │   └── index0.tsx
+│   │   ├── internal-catalog
+│   │   │   └── index0.tsx
+│   │   ├── needDetails
+│   │   │   └── index0.tsx
+│   │   ├── ocf-catalog
+│   │   │   └── index0.tsx
+│   │   └── strategic-axes
+│   │       ├── editStrategicAxe
+│   │       │   └── index0.tsx
+│   │       ├── index0.tsx
+│   │       └── manual-entry
+│   │           └── index0.tsx
+│   ├── ocf
+│   │   ├── add
+│   │   │   └── index0.tsx
+│   │   └── index0.tsx
+│   ├── Plan
+│   │   ├── annual
+│   │   │   ├── [exercice]
+│   │   │   │   ├── index0.tsx
+│   │   │   │   └── [theme]
+│   │   │   │       ├── [group]
+│   │   │   │       │   ├── accounting
+│   │   │   │       │   │   ├── addFee
+│   │   │   │       │   │   │   └── index0.tsx
+│   │   │   │       │   │   └── index0.tsx
+│   │   │   │       │   ├── evaluation
+│   │   │   │       │   │   ├── add
+│   │   │   │       │   │   │   └── index0.tsx
+│   │   │   │       │   │   ├── detail
+│   │   │   │       │   │   │   └── index0.tsx
+│   │   │   │       │   │   └── index0.tsx
+│   │   │   │       │   ├── index0.tsx
+│   │   │   │       │   ├── library
+│   │   │   │       │   │   ├── certificate
+│   │   │   │       │   │   │   └── index0.tsx
+│   │   │   │       │   │   ├── document
+│   │   │   │       │   │   │   ├── EducationalDocuments
+│   │   │   │       │   │   │   │   └── index0.tsx
+│   │   │   │       │   │   │   ├── MyEvaluationsComponent
+│   │   │   │       │   │   │   │   └── index0.tsx
+│   │   │   │       │   │   │   ├── index0.tsx
+│   │   │   │       │   │   │   └── PresenceList
+│   │   │   │       │   │   │       └── index0.tsx
+│   │   │   │       │   │   ├── index0.tsx
+│   │   │   │       │   │   └── media
+│   │   │   │       │   │       └── index0.tsx
+│   │   │   │       │   ├── participants
+│   │   │   │       │   │   └── index0.tsx
+│   │   │   │       │   ├── planning
+│   │   │   │       │   │   └── index0.tsx
+│   │   │   │       │   └── suppliers
+│   │   │   │       │       └── index0.tsx
+│   │   │   │       └── index0.tsx
+│   │   │   └── index0.tsx
+│   │   └── refund
+│   │       ├── [exercice]
+│   │       │   └── index0.tsx
+│   │       └── index0.tsx
+│   ├── reset-password
+│   │   └── index0.tsx
+│   ├── reset-password-email
+│   │   └── index0.tsx
+│   ├── settings
+│   │   ├── general
+│   │   │   ├── calendar
+│   │   │   │   └── index0.tsx
+│   │   │   ├── document
+│   │   │   │   └── index0.tsx
+│   │   │   ├── email
+│   │   │   │   └── index0.tsx
+│   │   │   ├── generalInfos
+│   │   │   │   ├── department
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   ├── domain
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   ├── fees
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   ├── index0.tsx
+│   │   │   │   ├── level
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   ├── position
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   ├── qualififcation
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   └── site
+│   │   │   │       └── index0.tsx
+│   │   │   ├── index0.tsx
+│   │   │   ├── notification
+│   │   │   │   └── index0.tsx
+│   │   │   ├── sms
+│   │   │   │   └── index0.tsx
+│   │   │   ├── strategic-axes
+│   │   │   │   └── index0.tsx
+│   │   │   └── template
+│   │   │       └── index0.tsx
+│   │   ├── notification
+│   │   │   └── index0.tsx
+│   │   └── security
+│   │       └── index0.tsx
+│   ├── setting-user-password
+│   │   └── index0.tsx
+│   ├── signin
+│   │   └── index0.tsx
+│   ├── signup
+│   │   └── index0.tsx
+│   ├── test
+│   │   └── index0.tsx
+│   ├── unauthorized
+│   │   └── index0.tsx
+│   └── User
+│       ├── addUser
+│       │   └── index0.tsx
+│       ├── editUser
+│       │   └── index0.tsx
+│       ├── groups
+│       │   └── index0.tsx
+│       ├── index0.tsx
+│       ├── planning
+│       │   └── index0.tsx
+│       ├── profile
+│       │   └── index0.tsx
+│       ├── training-history
+│       │   └── index0.tsx
+│       ├── user
+│       │   ├── index0.tsx
+│       │   └── index1.tsx
+│       └── user-profile
+│           ├── change-password
+│           │   └── index0.tsx
+│           ├── edit-profile
+│           │   └── index0.tsx
+│           └── index0.tsx
+├── postcss.config.js
+├── public
+│   ├── favicon.ico
+│   ├── images
+│   │   ├── archive.svg
+│   │   ├── auth-banner.png
+│   │   ├── avatar.svg
+│   │   ├── bg-modal.svg
+│   │   ├── calculator.svg
+│   │   ├── cancel.svg
+│   │   ├── chart.svg
+│   │   ├── checkboxes.svg
+│   │   ├── chevronDown.svg
+│   │   ├── chevronRight.svg
+│   │   ├── danger.svg
+│   │   ├── exclude.svg
+│   │   ├── Export.png
+│   │   ├── Export.svg
+│   │   ├── file_copy.svg
+│   │   ├── File Eye 3.svg
+│   │   ├── file_view.svg
+│   │   ├── folder.svg
+│   │   ├── home.svg
+│   │   ├── Import.png
+│   │   ├── Import.svg
+│   │   ├── login-banner.jpg
+│   │   ├── login-banner.png
+│   │   ├── logo.png
+│   │   ├── pdf.svg
+│   │   ├── profile.png
+│   │   ├── ranking.svg
+│   │   ├── removeImageIcone.svg
+│   │   ├── signup.png
+│   │   ├── supplier.svg
+│   │   ├── user-image.png
+│   │   ├── view_eval.svg
+│   │   └── wheel.svg
+│   └── vercel.svg
+├── README.md
+├── src
+│   ├── components
+│   │   ├── AccessRightModal
+│   │   │   └── index0.tsx
+│   │   ├── AccountCreationForm
+│   │   │   └── index0.tsx
+│   │   ├── AddUserForm
+│   │   │   └── index0.tsx
+│   │   ├── Alert
+│   │   │   └── index0.tsx
+│   │   ├── BreadcrumbNav
+│   │   │   └── index0.tsx
+│   │   ├── Buttons
+│   │   │   ├── Button
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TextButton
+│   │   │   │   └── index0.tsx
+│   │   │   └── ToggleButton
+│   │   │       └── index0.tsx
+│   │   ├── Calendar
+│   │   │   └── index0.tsx
+│   │   ├── CustomCheckbox
+│   │   │   └── index0.tsx
+│   │   ├── DashbordBar
+│   │   │   └── index0.tsx
+│   │   ├── Departement
+│   │   │   └── index0.tsx
+│   │   ├── DepartmentCard
+│   │   │   └── index0.tsx
+│   │   ├── DepartmentChart.tsx
+│   │   ├── DepartmentDoughnutChart.tsx
+│   │   ├── DepartmentsDonut
+│   │   │   └── index0.tsx
+│   │   ├── DonutChart
+│   │   │   └── index0.tsx
+│   │   ├── DragAndDropModal
+│   │   │   └── index0.tsx
+│   │   ├── enums
+│   │   │   └── index0.tsx
+│   │   ├── ErrorBoundary
+│   │   │   └── ErrorMessage.tsx
+│   │   ├── MyEvaluationsComponent
+│   │   │   ├── AutomationSection
+│   │   │   │   └── index0.tsx
+│   │   │   ├── AutomationSettings
+│   │   │   │   └── index0.tsx
+│   │   │   ├── DefaultButton
+│   │   │   │   └── index0.tsx
+│   │   │   ├── EvaluationItem
+│   │   │   │   └── index0.tsx
+│   │   │   ├── EvaluationSection
+│   │   │   │   └── index0.tsx
+│   │   │   ├── NewModelButton
+│   │   │   │   └── index0.tsx
+│   │   │   └── Toggle
+│   │   │       └── index0.tsx
+│   │   ├── ExpandableRow
+│   │   │   └── index0.tsx
+│   │   ├── FilterModal
+│   │   │   └── index0.tsx
+│   │   ├── Footer
+│   │   │   └── index0.tsx
+│   │   ├── ForgotPasswordForm
+│   │   │   └── index0.tsx
+│   │   ├── FormComponents
+│   │   │   ├── CustomSelect
+│   │   │   │   └── index0.tsx
+│   │   │   ├── EvaluationForm
+│   │   │   │   └── index0.tsx
+│   │   │   ├── FileInputField
+│   │   │   │   └── index0.tsx
+│   │   │   ├── InputField
+│   │   │   │   └── index0.tsx
+│   │   │   ├── InputFieldNumber
+│   │   │   │   └── index0.tsx
+│   │   │   ├── MultipleInputField
+│   │   │   │   └── index0.tsx
+│   │   │   ├── MultiselectField
+│   │   │   │   ├── index2.tsx
+│   │   │   │   └── index0.tsx
+│   │   │   ├── RadioButton
+│   │   │   │   └── index0.tsx
+│   │   │   ├── RadioGroup
+│   │   │   │   └── index0.tsx
+│   │   │   ├── SelectField
+│   │   │   │   └── index0.tsx
+│   │   │   ├── Switch
+│   │   │   │   └── index0.tsx
+│   │   │   ├── SwitchSelect
+│   │   │   │   └── index0.tsx
+│   │   │   ├── SwitchSelect2
+│   │   │   │   └── index0.tsx
+│   │   │   └── TextAreaField
+│   │   │       └── index0.tsx
+│   │   ├── FormField
+│   │   │   └── index0.tsx
+│   │   ├── Forms
+│   │   │   ├── AppCheckbox
+│   │   │   │   └── index0.tsx
+│   │   │   ├── Checkbox
+│   │   │   │   └── index0.tsx
+│   │   │   ├── DateInput
+│   │   │   │   └── index0.tsx
+│   │   │   ├── Form
+│   │   │   │   └── index0.tsx
+│   │   │   ├── FormError
+│   │   │   │   └── index0.tsx
+│   │   │   ├── FormField
+│   │   │   │   └── index0.tsx
+│   │   │   ├── FormSection
+│   │   │   │   └── inde.tsx
+│   │   │   ├── Input
+│   │   │   │   └── index0.tsx
+│   │   │   ├── InputField
+│   │   │   │   └── index0.tsx
+│   │   │   ├── Select
+│   │   │   │   └── index0.tsx
+│   │   │   ├── SelectField
+│   │   │   │   ├── index0.tsx
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TextArea
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TextAreas
+│   │   │   │   └── index0.tsx
+│   │   │   └── VerificationField
+│   │   │       └── index0.tsx
+│   │   ├── GeneralInfosForm
+│   │   │   └── index0.tsx
+│   │   ├── GroupCard
+│   │   │   └── index0.tsx
+│   │   ├── Header
+│   │   │   └── index0.tsx
+│   │   ├── ImportExportButtons
+│   │   │   └── index0.tsx
+│   │   ├── InternalCatalog
+│   │   │   └── index0.tsx
+│   │   ├── InvidualRequestForm.tsx
+│   │   ├── Layout
+│   │   │   └── index0.tsx
+│   │   ├── LegalContactForm
+│   │   │   └── index0.tsx
+│   │   ├── LegalInfosForm
+│   │   │   └── index0.tsx
+│   │   ├── LoadingSpinner
+│   │   │   └── index0.tsx
+│   │   ├── MainContent
+│   │   │   └── index0.tsx
+│   │   ├── ManualEntry
+│   │   │   ├── index2.tsx
+│   │   │   └── index0.tsx
+│   │   ├── MemberList
+│   │   │   └── index0.tsx
+│   │   ├── Modal
+│   │   │   ├── index2.tsx
+│   │   │   └── index0.tsx
+│   │   ├── ModalButton
+│   │   │   └── index0.tsx
+│   │   ├── ModalInformation
+│   │   │   └── index0.tsx
+│   │   ├── NavigationContext
+│   │   │   └── index0.tsx
+│   │   ├── Needs
+│   │   │   ├── MyEvaluationsComponent
+│   │   │   │   ├── Campaign
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   └── Dashboar
+│   │   │   │       └── index0.tsx
+│   │   │   ├── InternalCatalog
+│   │   │   │   ├── C
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   └── Dashboard
+│   │   │   │       └── index0.tsx
+│   │   │   ├── OCFCatalog
+│   │   │   │   ├── Dashboard
+│   │   │   │   │   └── index0.tsx
+│   │   │   │   └── OCF
+│   │   │   │       └── index0.tsx
+│   │   │   └── StrategicAxes
+│   │   │       ├── Campaign
+│   │   │       │   └── index0.tsx
+│   │   │       └── Dashboard
+│   │   │           └── index0.tsx
+│   │   ├── NestedDropdown
+│   │   │   └── index0.tsx
+│   │   ├── Notification
+│   │   │   ├── NotificationButton
+│   │   │   │   └── index0.tsx
+│   │   │   ├── NotificationItem
+│   │   │   │   └── index0.tsx
+│   │   │   └── NotificationMenu
+│   │   │       └── index0.tsx
+│   │   ├── NotificationPopup
+│   │   │   └── AnnualPlanPage.jsx
+│   │   ├── OcfCatalog
+│   │   │   └── index0.tsx
+│   │   ├── Pagination
+│   │   │   └── index0.tsx
+│   │   ├── Pagination1
+│   │   │   └── index0.tsx
+│   │   ├── PhotoGallery
+│   │   │   └── index0.tsx
+│   │   ├── ProfileField
+│   │   │   └── index0.tsx
+│   │   ├── ProgressBar
+│   │   │   └── index0.tsx
+│   │   ├── ProtectedRoute
+│   │   │   └── index0.tsx
+│   │   ├── ResetPasswordForm
+│   │   │   └── index0.tsx
+│   │   ├── Schedule
+│   │   │   └── index0.tsx
+│   │   ├── SearchFilterAddBar
+│   │   │   └── index0.tsx
+│   │   ├── SecondaryNavbar
+│   │   │   ├── index0.tsx
+│   │   │   ├── NavigationItem
+│   │   │   │   └── index0.tsx
+│   │   │   └── Submenu
+│   │   │       └── index0.tsx
+│   │   ├── SessionSidebar
+│   │   │   └── AnnualPlanPage.jsx
+│   │   ├── Sesssion
+│   │   │   └── index0.tsx
+│   │   ├── SettingPasswordForm
+│   │   │   └── index0.tsx
+│   │   ├── Sidebar
+│   │   │   └── index0.tsx
+│   │   ├── SigningForm
+│   │   │   └── index0.tsx
+│   │   ├── SignupForm
+│   │   │   └── index0.tsx
+│   │   ├── StrategicAxes
+│   │   │   ├── StractegicAxesSection
+│   │   │   │   └── inde.tsx
+│   │   │   └── StrategicAxesItem
+│   │   │       └── index0.tsx
+│   │   ├── Svgs
+│   │   │   ├── ChartIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── CheckmarkIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ChevronBack
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ChevronDown
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ChevronNext
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ChevronUp
+│   │   │   │   └── index0.tsx
+│   │   │   ├── CloseCircleIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── CloseIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── CrossIcon.tsx
+│   │   │   ├── DeleteIcon.tsx
+│   │   │   ├── DownloadIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── EditIcon.tsx
+│   │   │   ├── EyeFileIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── FileCopy
+│   │   │   │   └── index0.tsx
+│   │   │   ├── FilterIcon.tsx
+│   │   │   ├── FolderIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── PDFIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── PlaybackIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── PlayForwardIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── PlusIcon.tsx
+│   │   │   ├── SearchIcon.tsx
+│   │   │   ├── ShieldIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── SupplierIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── UploadIcon
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ViewIcon.tsx
+│   │   │   └── WheelIcon
+│   │   │       └── index0.tsx
+│   │   ├── TabBar
+│   │   │   └── index0.tsx
+│   │   ├── Tables
+│   │   │   ├── ConfirmModal
+│   │   │   │   └── index0.tsx
+│   │   │   ├── DynamicActionsRenderer
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ExpandableTableBodyClaude
+│   │   │   │   └── index0.tsx
+│   │   │   ├── ExpandableTableBodyGPT
+│   │   │   │   └── index0.tsx
+│   │   │   ├── GroupeRenderer
+│   │   │   │   └── index0.tsx
+│   │   │   ├── PermissionRenderer
+│   │   │   │   └── index0.tsx
+│   │   │   ├── PlanificationTable
+│   │   │   │   └── index0.tsx
+│   │   │   ├── StatusRenderer
+│   │   │   │   └── index0.tsx
+│   │   │   ├── Table
+│   │   │   │   └── index0.tsx
+│   │   │   ├── Table1
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableActions
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableBody
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableBody1
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableBodyE
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableContainer
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableE
+│   │   │   │   └── index0.tsx
+│   │   │   ├── TableHead
+│   │   │   │   └── index0.tsx
+│   │   │   └── TableHead1
+│   │   │       └── index0.tsx
+│   │   ├── ThemeToggle
+│   │   │   └── index0.tsx
+│   │   └── WarningModal
+│   │       └── index0.tsx
+│   ├── config
+│   │   ├── tableConfig.ts
+│   │   └── urls.ts
+│   ├── constants
+│   │   ├── commonConst.ts
+│   │   ├── navigation.ts
+│   │   └── tableConfig.ts
+│   ├── contexts
+│   │   ├── AuthContext.tsx
+│   │   ├── ProfileContext.tsx
+│   │   └── index1.tsx
+│   ├── data
+│   │   ├── accountingsData.js
+│   │   ├── annualPlanData.js
+│   │   ├── departments.js
+│   │   ├── externalCatalogData.js
+│   │   ├── internalCatalogData.js
+│   │   ├── needsDashboardCatalog.js
+│   │   ├── needsData.js
+│   │   ├── needsDatas.js
+│   │   ├── needsEvaluationAddData.js
+│   │   ├── needsEvaluationCompaign.js
+│   │   ├── needsEvaluation.js
+│   │   ├── needsIndividualRequestData.js
+│   │   ├── needsInternalCatalogCData.js
+│   │   ├── needsInternalCatalogDashboardData.js
+│   │   ├── needsInternalCatalog.js
+│   │   ├── needsInternalCatalogs.js
+│   │   ├── needsOCFCatalogCData.js
+│   │   ├── needsOCFCatalogDashboardData.js
+│   │   ├── needsOcfCatalog.js
+│   │   ├── needsOCFData.js
+│   │   ├── needsOcf.js
+│   │   ├── needsStrategicAxes.js
+│   │   ├── needsStrategicsAxes.js
+│   │   ├── next.config.js
+│   │   ├── planAnnualExerciceData.js
+│   │   ├── planAnnualExerciceThemeData.js
+│   │   ├── planGroupEvaluationData.js
+│   │   ├── planGroupUser2Data.js
+│   │   ├── planGroupUserData.js
+│   │   ├── planificationData.js
+│   │   ├── planingData.js
+│   │   ├── planRefundData.js
+│   │   ├── planRefundExerciceData.js
+│   │   ├── supplierData.js
+│   │   ├── trainingHistoryData.js
+│   │   └── UserData.js
+│   ├── enums
+│   │   └── AnnualPlanPage.ts
+│   ├── hooks
+│   │   ├── useNavigationState.ts
+│   │   ├── useNavigation.tsx
+│   │   ├── useNotifications.ts
+│   │   ├── useOutsideClick.ts
+│   │   ├── useScreenSize.ts
+│   │   ├── useTable.tsx
+│   │   ├── useToast.ts
+│   │   ├── useToggle.ts
+│   │   └── useVisibleColumns.ts
+│   ├── services
+│   │   ├── api.ts
+│   │   └── csvService.ts
+│   ├── @types
+│   │   ├── common.d.ts
+│   │   ├── form.d.ts
+│   │   ├── AnnualPlanPage.d.ts
+│   │   └── notification.ts
+│   ├── types
+│   │   ├── dataTypes.ts
+│   │   └── Table.types.ts
+│   └── utils
+│       └── sortUtils.ts
+├── styles
+│   ├── globals.css
+│   └── Home.module.css
+├── tailwind.config.js
+├── tree.txt
+├── tsconfig.json
+└── yarn.lock
+
+275 directories, 367 files
