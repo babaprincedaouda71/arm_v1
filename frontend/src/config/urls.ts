@@ -42,6 +42,8 @@ export const USERS_URLS = {
     import: `${API_URL}/users/import`,
     fetchProfile: `${API_URL}/auth/profile`,
     fetchCampaignEvaluationParticipants: `${API_URL}/users/campaign-evaluation/get/participants`,
+    changeRole: `${API_URL}/users/change-role`, // URL pour changer le rôle
+    updateManager: `${API_URL}/users/update-manager`, // URL pour changer le manager
 };
 
 export const SUPPLIERS_URLS = {

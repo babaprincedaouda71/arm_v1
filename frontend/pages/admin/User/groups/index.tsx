@@ -23,7 +23,6 @@ const TABLE_HEADERS = ["Groupe", "Utilisateurs", "Permission d'accès", "Actions
 const ACTIONS_TO_SHOW = ["edit", "delete"];
 const RECORDS_PER_PAGE = 5;
 
-
 const Groups = () => {
     const {data: groupData, mutate} = useSWR<GroupsProps[]>(GROUPS_URLS.mutate, fetcher);
 
@@ -78,9 +77,10 @@ const Groups = () => {
         setModalOpen(true);
     };
 
-    //Gestion du groupe Modal
+    // Gestion du modal des droits d'accès
     const [isAccessModalOpen, setAccessModalOpen] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<GroupsProps | null>(null);
+    const [selectedModule, setSelectedModule] = useState<string>("users"); // Module par défaut
 
     const openAccessModal = (group: GroupsProps) => {
         setSelectedGroup(group);
@@ -96,7 +96,7 @@ const Groups = () => {
         // Vérifier si le champ "name" est vide
         if (!formData.name.trim()) {
             setErrors("Le nom du groupe est obligatoire");
-            return; // Arrêter l'exécution si le champ est vide
+            return;
         }
 
         try {
@@ -136,7 +136,6 @@ const Groups = () => {
 
     const handleSearchChange = useCallback((value: string) => {
         setSearchValue(value);
-        // Réinitialiser la pagination à la première page lorsque la recherche change
         setCurrentPage(1);
     }, [setCurrentPage]);
 
@@ -145,7 +144,7 @@ const Groups = () => {
             <PermissionRenderer
                 value={row.name === "Admin" ? "Admin" : "_"}
                 permissionConfig={permissionConfig}
-                onClick={() => openAccessModal(row)}
+                onClick={() => row.name !== "Admin" && openAccessModal(row)}
             />
         ),
         actions: (_: string, row: GroupsProps) => (
@@ -153,7 +152,7 @@ const Groups = () => {
                 actions={ACTIONS_TO_SHOW}
                 row={row}
                 deleteUrl={GROUPS_URLS.delete}
-                editUrl="/admin/groups/edit" // Conservez la route existante pour compatibilité
+                editUrl="/admin/groups/edit"
                 mutateUrl={GROUPS_URLS.mutate}
                 confirmMessage={`Êtes-vous sûr de vouloir supprimer le groupe ${row.name} ?`}
                 customEditHandler={() => handleEditGroup(row)}
@@ -204,7 +203,7 @@ const Groups = () => {
                     renderers={renderers}
                 />
 
-                {/* Modal */}
+                {/* Modal de création/édition de groupe */}
                 <Modal
                     isOpen={isModalOpen}
                     onClose={closeModal}
@@ -235,16 +234,33 @@ const Groups = () => {
                     </div>
                 </Modal>
 
-                {/* Modal de gestion des accès */}
+                {/* Modal de gestion des droits d'accès */}
                 <AccessRightModal
                     isOpen={isAccessModalOpen}
                     onClose={closeAccessModal}
                     title={`Gérer les accès - ${selectedGroup?.name || ''}`}
                     subtitle="Modifiez les permissions de ce groupe"
-                    children={undefined}
-                    actions={undefined}
-                    accessRights={null}
+                    group={selectedGroup}
+                    module={selectedModule}
                 />
+
+                {/* Sélecteur de module pour les droits d'accès */}
+                {isAccessModalOpen && (
+                    <div className="fixed top-20 right-4 z-50 bg-white p-4 rounded-lg shadow-lg border">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Module à configurer:
+                        </label>
+                        <select
+                            value={selectedModule}
+                            onChange={(e) => setSelectedModule(e.target.value)}
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                        >
+                            <option value="users">Utilisateurs</option>
+                            <option value="plan">Plan</option>
+                            {/* Ajoutez d'autres modules selon vos besoins */}
+                        </select>
+                    </div>
+                )}
             </div>
         </ProtectedRoute>
     );

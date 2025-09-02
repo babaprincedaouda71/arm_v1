@@ -1,153 +1,239 @@
-import React from "react";
-import {AccessRightProps} from "@/types/dataTypes";
+// src/components/AccessRightModal/index.tsx
+import React, {useCallback, useEffect, useState} from 'react';
+import Modal from '@/components/Modal';
+import {GroupsProps} from '@/types/dataTypes';
+
+interface AccessRight {
+    id?: number;
+    action: string;
+    allowed: boolean;
+    actionLabel: string;
+}
+
+interface GroupAccessRightsResponse {
+    groupeId: number;
+    groupeName: string;
+    module: string;
+    accessRights: AccessRight[];
+}
 
 interface AccessRightModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
     subtitle: string;
-    children: React.ReactNode;
-    actions: {};
-    accessRights?: AccessRightProps[];
+    group: GroupsProps | null;
+    module?: string;
 }
 
-const AccessRightModal = ({
-                              isOpen,
-                              onClose,
-                              title,
-                              subtitle,
-                              children,
-                              actions,
-                              accessRights = []
-                          }: AccessRightModalProps) => {
-    if (!isOpen) return null;
+const ACCESS_RIGHTS_API = "/api/access-rights";
 
-    // Extraire toutes les actions uniques disponibles
-    const availableActions = Array.from(
-        new Set(accessRights.map(right => right.action))
-    ).sort();
+const AccessRightModal: React.FC<AccessRightModalProps> = ({
+                                                               isOpen,
+                                                               onClose,
+                                                               title,
+                                                               subtitle,
+                                                               group,
+                                                               module = "users"
+                                                           }) => {
+    const [accessRights, setAccessRights] = useState<AccessRight[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [hasChanges, setHasChanges] = useState(false);
 
-    // Grouper les droits par page
-    const rightsByPage = accessRights.reduce((acc, right) => {
-        if (!acc[right.page]) {
-            acc[right.page] = [];
+    // Charger les droits d'accès du groupe
+    const loadAccessRights = useCallback(async () => {
+        if (!group || !isOpen) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await fetch(`${ACCESS_RIGHTS_API}/group/${group.id}/module/${module}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors du chargement des droits d\'accès');
+            }
+
+            const data: GroupAccessRightsResponse = await response.json();
+            setAccessRights(data.accessRights);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erreur inconnue');
+            console.error('Erreur lors du chargement des droits d\'accès:', err);
+        } finally {
+            setLoading(false);
         }
-        acc[right.page].push(right);
-        return acc;
-    }, {} as Record<string, AccessRightProps[]>);
+    }, [group, module, isOpen]);
 
+    // Sauvegarder les modifications
+    const handleSave = useCallback(async () => {
+        if (!group || !hasChanges) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const updateRequest = {
+                groupeId: group.id,
+                module,
+                accessRights: accessRights.map(ar => ({
+                    action: ar.action,
+                    allowed: ar.allowed
+                }))
+            };
+
+            const response = await fetch(`${ACCESS_RIGHTS_API}/update`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateRequest),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la sauvegarde des droits d\'accès');
+            }
+
+            setHasChanges(false);
+            onClose();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erreur de sauvegarde');
+            console.error('Erreur lors de la sauvegarde:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [group, module, accessRights, hasChanges, onClose]);
+
+    // Gérer le changement d'un droit d'accès
+    const handleAccessRightChange = useCallback((action: string, allowed: boolean) => {
+        setAccessRights(prev =>
+            prev.map(ar =>
+                ar.action === action ? {...ar, allowed} : ar
+            )
+        );
+        setHasChanges(true);
+    }, []);
+
+    // Charger les données à l'ouverture
+    useEffect(() => {
+        if (isOpen && group) {
+            loadAccessRights();
+            setHasChanges(false);
+        }
+    }, [isOpen, group, loadAccessRights]);
+
+    // Réinitialiser l'état à la fermeture
+    useEffect(() => {
+        if (!isOpen) {
+            setAccessRights([]);
+            setError(null);
+            setHasChanges(false);
+        }
+    }, [isOpen]);
+
+    const modalActions = [
+        {
+            label: "Annuler",
+            onClick: onClose,
+            className: "border border-gray-300 hover:bg-gray-50",
+            disabled: loading
+        },
+        {
+            label: loading ? "Sauvegarde..." : "Sauvegarder",
+            onClick: handleSave,
+            className: "bg-gradient-to-b from-gradientBlueStart to-gradientBlueEnd text-white hover:opacity-90",
+            disabled: loading || !hasChanges
+        }
+    ];
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm flex justify-center items-center z-[55]">
-            <div className="bg-white rounded-lg p-6 flex flex-col space-y-6 w-[400px] lg:w-[700px]">
-                {/* En-tête du modal */}
-                <div className="relative mb-4">
-                    <div
-                        className="absolute inset-0 bg-right bg-[url('/images/bg-modal.svg')] bg-no-repeat opacity-20"
-                        style={{backgroundSize: "35% auto"}}
-                    ></div>
-                    <div className="flex items-center space-x-2">
-                        <div className="mr-2">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={3.5}
-                                stroke="currentColor"
-                                className="w-8 h-8 text-black"
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={title}
+            subtitle={subtitle}
+            actions={modalActions}
+            icon={undefined}
+        >
+            <div className="space-y-4">
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+                        {error}
+                    </div>
+                )}
+
+                {loading && accessRights.length === 0 ? (
+                    <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        <h4 className="font-semibold text-gray-700 mb-4">
+                            Permissions pour le module "{module}"
+                        </h4>
+
+                        {accessRights.map((accessRight) => (
+                            <div
+                                key={accessRight.action}
+                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                        </div>
-                        <div>
-                            {title && <h2 className="text-xl font-bold">{title}</h2>}
-                            {subtitle && (
-                                <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
-                            )}
+                                <div className="flex flex-col">
+                  <span className="font-medium text-gray-800">
+                    {accessRight.actionLabel}
+                  </span>
+                                    <span className="text-sm text-gray-500 capitalize">
+                    Action: {accessRight.action}
+                  </span>
+                                </div>
+
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={accessRight.allowed}
+                                        onChange={(e) => handleAccessRightChange(accessRight.action, e.target.checked)}
+                                        disabled={loading}
+                                    />
+                                    <div
+                                        className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                    <span className="ml-3 text-sm font-medium text-gray-700">
+                    {accessRight.allowed ? 'Autorisé' : 'Refusé'}
+                  </span>
+                                </label>
+                            </div>
+                        ))}
+
+                        {accessRights.length === 0 && !loading && (
+                            <div className="text-center py-8 text-gray-500">
+                                Aucun droit d'accès trouvé pour ce groupe.
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {hasChanges && (
+                    <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                ⚠️
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm">
+                                    Des modifications ont été apportées. N'oubliez pas de sauvegarder.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Corps du modal */}
-                <div className="mb-6">
-                    {children || (
-                        <div className="space-y-6">
-                            {/* En-têtes des actions */}
-                            <div className="grid gap-4" style={{
-                                gridTemplateColumns: `minmax(100px, 1fr) repeat(${availableActions.length}, minmax(0, 1fr))`
-                            }}>
-                                <div className="col-span-1"></div>
-                                {availableActions.map((action) => (
-                                    <div key={action} className="text-gray-400 text-center">
-                                        {action}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Liste des droits par page */}
-                            <div className="space-y-4">
-                                {Object.entries(rightsByPage).map(([page, rights]) => (
-                                    <div key={page} className="grid gap-4 items-center border-b pb-2" style={{
-                                        gridTemplateColumns: `minmax(100px, 1fr) repeat(${availableActions.length}, minmax(0, 1fr))`
-                                    }}>
-                                        <span className="font-semibold">{page}</span>
-                                        {availableActions.map((action) => {
-                                            const right = rights.find(r => r.action === action);
-                                            return (
-                                                <div key={`${page}-${action}`} className="flex justify-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="h-5 w-5 accent-primary"
-                                                        checked={right?.allowed || false}
-                                                        onChange={() => {
-                                                            // Gérer le changement d'état ici
-                                                        }}
-                                                    />
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Pied de page du modal */}
-                <div className="flex justify-around">
-                    {actions && Array.isArray(actions) && actions.length > 0 ? (
-                        actions.map((action, index) => (
-                            <button
-                                key={index}
-                                className={`${action.className} px-4 py-2 rounded-md`}
-                                onClick={action.onClick}
-                            >
-                                {action.label}
-                            </button>
-                        ))
-                    ) : (
-                        <>
-                            <button
-                                className="border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50"
-                                onClick={onClose}
-                            >
-                                Non! Annuler
-                            </button>
-                            <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                                onClick={onClose}
-                            >
-                                Enregistrer
-                            </button>
-                        </>
-                    )}
-                </div>
+                )}
             </div>
-        </div>
+        </Modal>
     );
 };
 

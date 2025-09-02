@@ -4,6 +4,7 @@ import org.example.authservice.entity.Groupe;
 import org.example.authservice.entity.User;
 import org.example.authservice.repository.GroupeRepository;
 import org.example.authservice.repository.UserRepository;
+import org.example.authservice.service.AccessRightService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootApplication
 @EnableFeignClients
@@ -25,282 +27,235 @@ public class AuthServiceApplication {
     CommandLineRunner commandLineRunner(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            GroupeRepository groupeRepository
-            ) {
+            GroupeRepository groupeRepository,
+            AccessRightService accessRightService // Injection du service de droits d'accès
+    ) {
         return args -> {
 
-            // create roles
-            Groupe groupe01 = Groupe.builder()
-                    .companyId(1L)
-                    .name("Formateur")
-                    .description("Formateur")
-                    .build();
-            Groupe groupe02 = Groupe.builder()
-                    .companyId(1L)
-                    .name("Admin")
-                    .description("Admin")
-                    .build();
-            Groupe groupe03 = Groupe.builder()
-                    .companyId(1L)
-                    .name("Collaborateur")
-                    .description("Collaborateur")
-                    .build();
-            Groupe groupe04 = Groupe.builder()
-                    .companyId(1L)
-                    .name("Manager")
-                    .description("Manager")
-                    .build();
-            Groupe groupe05 = Groupe.builder()
-                    .companyId(2L)
-                    .name("Admin")
-                    .description("Admin")
-                    .build();
+            // Vérifier si les données existent déjà pour éviter les doublons
+            if (groupeRepository.count() > 0) {
+                System.out.println("Les données existent déjà. Initialisation ignorée.");
+                return;
+            }
 
-            Groupe groupe06 = Groupe.builder()
-                    .companyId(1L)
-                    .name("Employé")
-                    .description("Employé")
-                    .build();
-            groupeRepository.save(groupe01);
-            groupeRepository.save(groupe02);
-            groupeRepository.save(groupe03);
-            groupeRepository.save(groupe04);
-            groupeRepository.save(groupe05);
-            groupeRepository.save(groupe06);
+            System.out.println("Initialisation des groupes et droits d'accès par défaut...");
 
-            // create users
-            User user = User.builder()
-                    .email("iambabaprince@gmail.com")
-                    .firstName("Prince")
-                    .lastName("Coulibaly")
-                    .password(passwordEncoder.encode("0112"))
-                    .creationDate(LocalDate.now().toString())
-                    .active(true)
-                    .cin("CD789012")
-                    .socialSecurityNumber("123456789012")
-                    .status("Actif")
-                    .role("Collaborateur")
-                    .managerId(2L)
-                    .groupe(groupe03)
-                    .department("Département Technique")
-                    .companyId(1L)
-                    .firstLogin(true)
-                    .build();
-            User user2 = User.builder()
-                    .email("thomasjudejunior@gmail.com")
-                    .firstName("Thomas Junior")
-                    .lastName("Jude")
-                    .department("Direction Administrative")
-                    .password(passwordEncoder.encode("0112"))
-                    .creationDate(LocalDate.now().toString())
-                    .active(true)
-                    .cin("AB123456")
-                    .socialSecurityNumber("987654321098")
-                    .status("Actif")
-                    .role("Manager")
-                    .groupe(groupe04)
-                    .firstLogin(true)
-                    .companyId(1L)
-                    .build();
-            User user3 = User.builder()
-                    .email("babaprince71@gmail.com")
-                    .firstName("Baba Daouda")
-                    .lastName("Prince")
-                    .address("Apt1 GH1 Imm 16 Andalous, Mohammedia, Maroc")
-                    .birthDate(LocalDate.now().toString())
-                    .phoneNumber("+212693823094")
-                    .cin("BK12273Z")
-                    .gender("Homme")
-                    .hiringDate(LocalDate.now().toString())
-                    .socialSecurityNumber("456789123456")
-                    .collaboratorCode("GS-022151")
-                    .position("DG")
-                    .department("Direction Administrative")
-                    .companyId(1L)
-                    .password(passwordEncoder.encode("0112"))
-                    .creationDate(LocalDate.now().toString())
-                    .active(true)
-                    .firstLogin(true)
-                    .status("Actif")
-                    .role("Admin")
-                    .groupe(groupe02)
-                    .build();
-            User user4 = User.builder()
-                    .email("sandra@gmail.com")
-                    .firstName("Sandra")
-                    .lastName("Aka")
-                    .address("Apt1 GH1 Imm 16 Andalous, Mohammedia, Maroc")
-                    .birthDate(LocalDate.now().toString())
-                    .phoneNumber("+212693823094")
-                    .cin("EF345678")
-                    .managerId(2L)
-                    .gender("Femme")
-                    .hiringDate(LocalDate.now().toString())
-                    .socialSecurityNumber("321098765432")
-                    .collaboratorCode("ATZ-022151")
-                    .position("DRH")
-                    .department("Service Commercial")
-                    .companyId(1L)
-                    .password(passwordEncoder.encode("0112"))
-                    .creationDate(LocalDate.now().toString())
-                    .active(true)
-                    .firstLogin(true)
-                    .status("Actif")
-                    .role("Collaborateur")
-                    .groupe(groupe03)
-                    .build();
+            // Créer les groupes par défaut
+            List<Groupe> groupesToCreate = List.of(
+                    Groupe.builder()
+                            .companyId(1L)
+                            .name("Admin")
+                            .description("Administrateur système avec tous les droits")
+                            .build(),
 
-            User user5 = User.builder()
-                    .email("boris@gmail.com")
-                    .firstName("Boris")
-                    .lastName("Samne")
-                    .address("Boukhalef, Tanger, Maroc")
-                    .birthDate("2023-05-01")
-                    .phoneNumber("+212693823094")
-                    .cin("GH901234")
-                    .managerId(2L)
-                    .gender("Homme")
-                    .hiringDate(LocalDate.now().toString())
-                    .socialSecurityNumber("654321098765")
-                    .collaboratorCode("ATZ-022151")
-                    .position("Agent Back office")
-                    .department("Service Client")
-                    .companyId(1L)
-                    .password(passwordEncoder.encode("0112"))
-                    .creationDate(LocalDate.now().toString())
-                    .active(true)
-                    .firstLogin(true)
-                    .status("Actif")
-                    .role("Employé")
-                    .groupe(groupe06)
-                    .build();
-            userRepository.save(user);
-            userRepository.save(user2);
-            userRepository.save(user3);
-            userRepository.save(user4);
-            userRepository.save(user5);
+                    Groupe.builder()
+                            .companyId(1L)
+                            .name("Manager")
+                            .description("Manager avec droits étendus")
+                            .build(),
 
-            // create more collaborators
-//            User collaborateur1 = User.builder()
-//                    .email("collaborateur1@example.com")
-//                    .firstName("Ali")
-//                    .lastName("Ahmed")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Collaborateur")
-//                    .groupe(groupe03)
-//                    .companyId(1L)
-//                    .managerId(9L)
-//                    .firstLogin(true)
-//                    .build();
-//            User collaborateur2 = User.builder()
-//                    .email("collaborateur2@example.com")
-//                    .firstName("Fatima")
-//                    .lastName("Zahra")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Collaborateur")
-//                    .groupe(groupe03)
-//                    .companyId(1L)
-//                    .managerId(10L)
-//                    .firstLogin(true)
-//                    .build();
-//            User collaborateur3 = User.builder()
-//                    .email("collaborateur3@example.com")
-//                    .firstName("Youssef")
-//                    .lastName("Rachid")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Collaborateur")
-//                    .groupe(groupe03)
-//                    .companyId(1L)
-//                    .managerId(11L)
-//                    .firstLogin(true)
-//                    .build();
-//            User collaborateur4 = User.builder()
-//                    .email("collaborateur4@example.com")
-//                    .firstName("Khadija")
-//                    .lastName("Omar")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Collaborateur")
-//                    .groupe(groupe03)
-//                    .companyId(12L)
-//                    .firstLogin(true)
-//                    .build();
-//
-//            userRepository.save(collaborateur1);
-//            userRepository.save(collaborateur2);
-//            userRepository.save(collaborateur3);
-//            userRepository.save(collaborateur4);
-//
-//            // create more managers
-//            User manager1 = User.builder()
-//                    .email("manager1@example.com")
-//                    .firstName("Said")
-//                    .lastName("Karim")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Manager")
-//                    .groupe(groupe04)
-//                    .companyId(1L)
-//                    .firstLogin(true)
-//                    .build();
-//            User manager2 = User.builder()
-//                    .email("manager2@example.com")
-//                    .firstName("Leila")
-//                    .lastName("Fahd")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Manager")
-//                    .groupe(groupe04)
-//                    .companyId(1L)
-//                    .firstLogin(true)
-//                    .build();
-//            User manager3 = User.builder()
-//                    .email("manager3@example.com")
-//                    .firstName("Hassan")
-//                    .lastName("Jawad")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Manager")
-//                    .groupe(groupe04)
-//                    .companyId(1L)
-//                    .firstLogin(true)
-//                    .build();
-//            User manager4 = User.builder()
-//                    .email("manager4@example.com")
-//                    .firstName("Nadia")
-//                    .lastName("Kamal")
-//                    .password(passwordEncoder.encode("0112"))
-//                    .creationDate(LocalDate.now().toString())
-//                    .active(true)
-//                    .status("Actif")
-//                    .role("Manager")
-//                    .groupe(groupe04)
-//                    .companyId(1L)
-//                    .firstLogin(true)
-//                    .build();
-//
-//            userRepository.save(manager1);
-//            userRepository.save(manager2);
-//            userRepository.save(manager3);
-//            userRepository.save(manager4);
+                    Groupe.builder()
+                            .companyId(1L)
+                            .name("Formateur")
+                            .description("Formateur avec droits limités")
+                            .build(),
+
+                    Groupe.builder()
+                            .companyId(1L)
+                            .name("Collaborateur")
+                            .description("Collaborateur avec droits de base")
+                            .build(),
+
+                    Groupe.builder()
+                            .companyId(1L)
+                            .name("Employé")
+                            .description("Employé avec droits minimaux")
+                            .build(),
+
+                    Groupe.builder()
+                            .companyId(2L)
+                            .name("Admin")
+                            .description("Admin pour entreprise 2")
+                            .build()
+            );
+
+            // Sauvegarder les groupes et créer leurs droits d'accès
+            for (Groupe groupe : groupesToCreate) {
+                Groupe savedGroupe = groupeRepository.save(groupe);
+                System.out.println("Groupe créé : " + savedGroupe.getName());
+
+                // Créer les droits d'accès par défaut pour ce groupe
+                try {
+                    accessRightService.createDefaultAccessRights(savedGroupe);
+                    System.out.println("Droits d'accès créés pour le groupe : " + savedGroupe.getName());
+                } catch (Exception e) {
+                    System.err.println("Erreur lors de la création des droits pour " + savedGroupe.getName() + " : " + e.getMessage());
+                }
+            }
+
+            // Récupérer les groupes sauvegardés pour l'assignation aux utilisateurs
+            Groupe adminGroupe = groupeRepository.findByNameAndCompanyId("Admin", 1L).orElse(null);
+            Groupe managerGroupe = groupeRepository.findByNameAndCompanyId("Manager", 1L).orElse(null);
+            Groupe formateurGroupe = groupeRepository.findByNameAndCompanyId("Formateur", 1L).orElse(null);
+            Groupe collaborateurGroupe = groupeRepository.findByNameAndCompanyId("Collaborateur", 1L).orElse(null);
+            Groupe employeGroupe = groupeRepository.findByNameAndCompanyId("Employé", 1L).orElse(null);
+
+            // Créer les utilisateurs de test
+            List<User> usersToCreate = List.of(
+                    // Admin principal
+                    User.builder()
+                            .email("babaprince71@gmail.com")
+                            .firstName("Baba Daouda")
+                            .lastName("Prince")
+                            .address("Apt1 GH1 Imm 16 Andalous, Mohammedia, Maroc")
+                            .birthDate(LocalDate.now().toString())
+                            .phoneNumber("+212693823094")
+                            .cin("BK12273Z")
+                            .gender("Homme")
+                            .hiringDate(LocalDate.now().toString())
+                            .socialSecurityNumber("456789123456")
+                            .collaboratorCode("GS-022151")
+                            .position("DG")
+                            .department("Direction Administrative")
+                            .companyId(1L)
+                            .password(passwordEncoder.encode("0112"))
+                            .creationDate(LocalDate.now().toString())
+                            .active(true)
+                            .firstLogin(true)
+                            .status("Actif")
+                            .role("Admin")
+                            .groupe(adminGroupe)
+                            .build(),
+
+                    // Manager
+                    User.builder()
+                            .email("thomasjudejunior@gmail.com")
+                            .firstName("Thomas Junior")
+                            .lastName("Jude")
+                            .department("Direction Administrative")
+                            .password(passwordEncoder.encode("0112"))
+                            .creationDate(LocalDate.now().toString())
+                            .active(true)
+                            .cin("AB123456")
+                            .socialSecurityNumber("987654321098")
+                            .status("Actif")
+                            .role("Manager")
+                            .groupe(managerGroupe)
+                            .firstLogin(true)
+                            .companyId(1L)
+                            .build(),
+
+                    // Formateur
+                    User.builder()
+                            .email("formateur@gmail.com")
+                            .firstName("Ahmed")
+                            .lastName("Formateur")
+                            .department("Formation")
+                            .password(passwordEncoder.encode("0112"))
+                            .creationDate(LocalDate.now().toString())
+                            .active(true)
+                            .cin("FT123456")
+                            .socialSecurityNumber("111222333444")
+                            .status("Actif")
+                            .role("Formateur")
+                            .groupe(formateurGroupe)
+                            .firstLogin(true)
+                            .companyId(1L)
+                            .managerId(2L) // Manager comme supérieur
+                            .build(),
+
+                    // Collaborateur
+                    User.builder()
+                            .email("sandra@gmail.com")
+                            .firstName("Sandra")
+                            .lastName("Aka")
+                            .address("Apt1 GH1 Imm 16 Andalous, Mohammedia, Maroc")
+                            .birthDate(LocalDate.now().toString())
+                            .phoneNumber("+212693823094")
+                            .cin("EF345678")
+                            .managerId(2L)
+                            .gender("Femme")
+                            .hiringDate(LocalDate.now().toString())
+                            .socialSecurityNumber("321098765432")
+                            .collaboratorCode("ATZ-022151")
+                            .position("DRH")
+                            .department("Service Commercial")
+                            .companyId(1L)
+                            .password(passwordEncoder.encode("0112"))
+                            .creationDate(LocalDate.now().toString())
+                            .active(true)
+                            .firstLogin(true)
+                            .status("Actif")
+                            .role("Collaborateur")
+                            .groupe(collaborateurGroupe)
+                            .build(),
+
+                    // Employé
+                    User.builder()
+                            .email("boris@gmail.com")
+                            .firstName("Boris")
+                            .lastName("Samne")
+                            .address("Boukhalef, Tanger, Maroc")
+                            .birthDate("2023-05-01")
+                            .phoneNumber("+212693823094")
+                            .cin("GH901234")
+                            .managerId(2L)
+                            .gender("Homme")
+                            .hiringDate(LocalDate.now().toString())
+                            .socialSecurityNumber("654321098765")
+                            .collaboratorCode("ATZ-022151")
+                            .position("Agent Back office")
+                            .department("Service Client")
+                            .companyId(1L)
+                            .password(passwordEncoder.encode("0112"))
+                            .creationDate(LocalDate.now().toString())
+                            .active(true)
+                            .firstLogin(true)
+                            .status("Actif")
+                            .role("Employé")
+                            .groupe(employeGroupe)
+                            .build()
+            );
+
+            // Sauvegarder les utilisateurs
+            for (User user : usersToCreate) {
+                userRepository.save(user);
+                System.out.println("Utilisateur créé : " + user.getEmail() + " (" + user.getRole() + ")");
+            }
+
+            System.out.println("Initialisation terminée avec succès !");
+
+            // Afficher un résumé des permissions par groupe
+            displayPermissionsSummary();
         };
     }
 
+    /**
+     * Affiche un résumé des permissions par défaut par groupe
+     */
+    private void displayPermissionsSummary() {
+        System.out.println("\n=== RÉSUMÉ DES PERMISSIONS PAR DÉFAUT ===");
+
+        System.out.println("\n🔧 ADMIN:");
+        System.out.println("  ✅ Module Users: Tous les droits (view, create, edit, delete, export, view_details)");
+        System.out.println("  ✅ Module Plan: Tous les droits (view, create, edit, approve)");
+
+        System.out.println("\n👔 MANAGER:");
+        System.out.println("  ✅ Module Users: Tous sauf delete (view, create, edit, export, view_details)");
+        System.out.println("  ✅ Module Plan: Tous les droits (view, create, edit, approve)");
+
+        System.out.println("\n🎓 FORMATEUR:");
+        System.out.println("  ✅ Module Users: Lecture seule (view, view_details)");
+        System.out.println("  ❌ Module Plan: Aucun droit");
+
+        System.out.println("\n👤 COLLABORATEUR:");
+        System.out.println("  ✅ Module Users: Voir ses propres détails (view_details)");
+        System.out.println("  ❌ Module Plan: Aucun droit");
+
+        System.out.println("\n👷 EMPLOYÉ:");
+        System.out.println("  ✅ Module Users: Voir ses propres détails (view_details)");
+        System.out.println("  ❌ Module Plan: Aucun droit");
+
+        System.out.println("\n=========================================\n");
+    }
 }

@@ -1,7 +1,10 @@
+// src/components/Tables/GroupeRenderer/index.tsx - Version finale
+
 import React, {useCallback, useState} from "react";
 import {GroupeRendererProps} from "@/types/Table.types";
 import {mutate} from "swr";
 import {ConfirmModal} from "@/components/Tables/ConfirmModal";
+import {USERS_URLS} from "@/config/urls";
 
 interface GroupeConfig {
     label: string;
@@ -17,22 +20,25 @@ interface GroupeConfig {
 
 interface RowData {
     id: string | number;
-
     [key: string]: any; // Autres propriétés de la ligne
 }
 
 interface EnhancedGroupeRendererProps extends GroupeRendererProps {
     row?: RowData; // Objet contenant les données de la ligne
-    groupeOptions?: string[]; // Liste des statuts possibles
-    apiUrl?: string; // URL pour la mise à jour du statut
+    groupeOptions?: string[]; // Liste des groupes possibles
+    apiUrl?: string; // URL pour la mise à jour du groupe
+    mutateUrl?: string; // URL pour revalider les données
+    readOnly?: boolean; // Nouvelle prop pour désactiver les modifications
 }
 
 const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
                                                                    value,
                                                                    groupeConfig: groupConfig,
                                                                    row,
-                                                                   groupeOptions = ["active", "inactive", "pending"],
-                                                                   apiUrl = "http://localhost:8888/api/users/change-role",
+                                                                   groupeOptions = [],
+                                                                   apiUrl = USERS_URLS.changeRole,
+                                                                   mutateUrl = USERS_URLS.mutate,
+                                                                   readOnly = false // Valeur par défaut
                                                                }) => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -49,17 +55,17 @@ const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
     };
 
     const updateGroupe = useCallback(async (newRole: string) => {
-        if (newRole === value || isAdmin) {
+        if (newRole === value || isAdmin || readOnly) {
             setIsMenuOpen(false);
             return;
         }
 
         setSelectedGroupe(newRole);
         setIsConfirmationOpen(true);
-    }, [value]);
+    }, [value, isAdmin, readOnly]);
 
     const handleConfirmation = useCallback(async (confirmed: boolean) => {
-        if (confirmed && selectedGroupe && row?.id) {
+        if (confirmed && selectedGroupe && row?.id && !readOnly) {
             try {
                 setIsUpdating(true);
 
@@ -76,11 +82,11 @@ const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Erreur lors de la mise à jour du statut: ${response.statusText}`);
+                    throw new Error(`Erreur lors de la mise à jour du groupe: ${response.statusText}`);
                 }
 
                 // Rafraîchir les données avec SWR après mise à jour
-                await mutate("http://localhost:8888/api/users/get/all");
+                await mutate(mutateUrl);
             } catch (error) {
                 console.error("Erreur lors de la mise à jour du rôle de l'utilisateur:", error);
                 // Optionnel : ajouter une notification d'erreur ici
@@ -92,28 +98,49 @@ const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
 
         setIsConfirmationOpen(false);
         setSelectedGroupe(null);
-    }, [selectedGroupe, row?.id, apiUrl]);
+    }, [selectedGroupe, row?.id, apiUrl, mutateUrl, readOnly]);
 
     const toggleMenu = (e: React.MouseEvent) => {
         e.stopPropagation();
+
+        if (readOnly) {
+            return; // Ne rien faire en mode lecture seule
+        }
+
         if (isAdmin) {
             alert("Le rôle Admin ne peut pas être modifié.");
-        } else {
+        } else if (groupeOptions.length > 0) {
             setIsMenuOpen(!isMenuOpen);
         }
+    };
+
+    const getDisplayMessage = () => {
+        if (readOnly) return "Modification non autorisée";
+        if (isAdmin) return "Le rôle Admin ne peut pas être modifié";
+        if (groupeOptions.length === 0) return "Aucun groupe disponible";
+        return undefined;
     };
 
     return (
         <div className="flex justify-center items-center relative">
             <div
-                className="relative cursor-pointer"
+                className={`relative ${
+                    !readOnly && !isAdmin && groupeOptions.length > 0
+                        ? 'cursor-pointer'
+                        : readOnly
+                            ? 'cursor-not-allowed'
+                            : 'cursor-default'
+                }`}
                 onClick={toggleMenu}
                 role="button"
                 aria-haspopup="true"
                 aria-expanded={isMenuOpen}
+                title={getDisplayMessage()}
             >
                 <div
-                    className={`flex items-center py-[8px] px-[16px] rounded-lg font-extrabold ${isUpdating ? 'opacity-50' : ''}`}
+                    className={`flex items-center py-[8px] px-[16px] rounded-lg font-extrabold ${
+                        isUpdating ? 'opacity-50' : ''
+                    } ${readOnly ? 'opacity-75' : ''}`}
                     style={{
                         color: config.color,
                         backgroundColor: config.backgroundColor,
@@ -127,8 +154,13 @@ const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
                     )}
                     {config.icon && <span className="mr-2">{config.icon}</span>}
                     {config.label}
-                    {isAdmin && ( // Afficher un indicateur si l'utilisateur est un Admin
+                    {isAdmin && (
                         <span className="ml-2 text-sm text-gray-500">(Non modifiable)</span>
+                    )}
+                    {readOnly && !isAdmin && (
+                        <span className="ml-1 text-xs opacity-60" title="Lecture seule">
+                            🔒
+                        </span>
                     )}
                 </div>
                 {config.pill?.show && (
@@ -138,14 +170,16 @@ const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
                 )}
             </div>
 
-            {/* Menu déroulant pour sélectionner un nouveau statut */}
-            {isMenuOpen && !isAdmin && (
-                <div className="absolute z-10 mt-2 bg-white border rounded-md shadow-lg top-full">
+            {/* Menu déroulant pour sélectionner un nouveau groupe */}
+            {isMenuOpen && !isAdmin && !readOnly && groupeOptions.length > 0 && (
+                <div className="absolute z-10 mt-2 bg-white border rounded-md shadow-lg top-full min-w-[150px]">
                     <ul className="py-1">
                         {groupeOptions.map((groupe) => (
                             <li
                                 key={groupe}
-                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${groupe === value ? 'font-bold bg-gray-50' : ''}`}
+                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-center ${
+                                    groupe === value ? 'font-bold bg-gray-50' : ''
+                                }`}
                                 onClick={() => updateGroupe(groupe)}
                                 role="menuitem"
                             >
@@ -166,13 +200,15 @@ const GroupeRenderer: React.FC<EnhancedGroupeRendererProps> = ({
             )}
 
             {/* Pop-up de confirmation */}
-            <ConfirmModal
-                isOpen={isConfirmationOpen}
-                onClose={() => handleConfirmation(false)}
-                onConfirm={() => handleConfirmation(true)}
-                title="Confirmer le changement de rôle"
-                message="Êtes-vous sûr de vouloir changer le rôle de cet utilisateur ?"
-            />
+            {!readOnly && (
+                <ConfirmModal
+                    isOpen={isConfirmationOpen}
+                    onClose={() => handleConfirmation(false)}
+                    onConfirm={() => handleConfirmation(true)}
+                    title="Confirmer le changement de rôle"
+                    message="Êtes-vous sûr de vouloir changer le rôle de cet utilisateur ?"
+                />
+            )}
         </div>
     );
 };

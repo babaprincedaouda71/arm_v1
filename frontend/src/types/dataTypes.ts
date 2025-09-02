@@ -15,6 +15,7 @@ export interface TrainingHistoricProps {
 }
 
 export interface GroupsProps {
+    id: number;
     name: string;
     userCount: string;
 }

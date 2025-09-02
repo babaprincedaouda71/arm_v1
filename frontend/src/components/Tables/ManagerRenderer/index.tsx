@@ -1,7 +1,10 @@
+// src/components/Tables/ManagerRenderer/index.tsx - Version finale
+
 import React, {useCallback, useState} from "react";
 import {ManagerRendererProps} from "@/types/Table.types";
 import {mutate} from "swr";
 import {ConfirmModal} from "@/components/Tables/ConfirmModal";
+import {USERS_URLS} from "@/config/urls";
 
 interface ManagerConfig {
     label?: string;
@@ -26,22 +29,30 @@ interface EnhancedManagerRendererProps extends ManagerRendererProps {
     row?: RowData; // Objet contenant les données de la ligne
     managerOptions?: { value: number; label: string }[]; // Liste des managers potentiels { id, "Prénom Nom" }
     apiUrl?: string; // URL pour la mise à jour du manager
+    mutateUrl?: string; // URL pour revalider les données
+    readOnly?: boolean; // Nouvelle prop pour désactiver les modifications
 }
 
 const ManagerRenderer: React.FC<EnhancedManagerRendererProps> = ({
                                                                      value: currentManagerName, // Le nom du manager actuel affiché
                                                                      row,
                                                                      managerOptions = [],
-                                                                     apiUrl = "http://localhost:8888/api/users/update-manager",
+                                                                     apiUrl = USERS_URLS.updateManager,
+                                                                     mutateUrl = USERS_URLS.mutate,
+                                                                     readOnly = false // Valeur par défaut
                                                                  }) => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     const [selectedManagerId, setSelectedManagerId] = useState<number | null>(null);
-    const [selectedManagerName, setSelectedManagerName] = useState<string | null>(currentManagerName || "Pas défini");
+    const [selectedManagerName, setSelectedManagerName] = useState<string | null>(null);
 
+    const updateManager = useCallback(async (newManagerId: number | null, newManagerName: string) => {
+        if (readOnly) {
+            setIsMenuOpen(false);
+            return;
+        }
 
-    const updateManager = useCallback(async (newManagerId: number, newManagerName: string) => {
         const currentManagerId = row?.managerId;
         if (newManagerId === currentManagerId) {
             setIsMenuOpen(false);
@@ -51,10 +62,11 @@ const ManagerRenderer: React.FC<EnhancedManagerRendererProps> = ({
         setSelectedManagerId(newManagerId);
         setSelectedManagerName(newManagerName);
         setIsConfirmationOpen(true);
-    }, [row?.managerId]);
+        setIsMenuOpen(false); // Fermer le menu
+    }, [row?.managerId, readOnly]);
 
     const handleConfirmation = useCallback(async (confirmed: boolean) => {
-        if (confirmed && selectedManagerId !== null && row?.id) {
+        if (confirmed && row?.id && !readOnly) {
             try {
                 setIsUpdating(true);
                 const response = await fetch(apiUrl, {
@@ -74,56 +86,82 @@ const ManagerRenderer: React.FC<EnhancedManagerRendererProps> = ({
                 }
 
                 // Rafraîchir les données avec SWR après mise à jour
-                await mutate("http://localhost:8888/api/users/get/all");
-                // Mise à jour locale du nom du manager après succès
-                setSelectedManagerName(selectedManagerName);
+                await mutate(mutateUrl);
             } catch (error) {
                 console.error("Erreur lors de la mise à jour du manager:", error);
                 // Optionnel : ajouter une notification d'erreur ici
             } finally {
                 setIsUpdating(false);
-                setIsMenuOpen(false);
             }
         }
 
         setIsConfirmationOpen(false);
         setSelectedManagerId(null);
         setSelectedManagerName(null);
-    }, [selectedManagerId, row?.id, apiUrl, selectedManagerName]);
+    }, [row?.id, apiUrl, mutateUrl, readOnly, selectedManagerId]);
 
     const toggleMenu = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsMenuOpen(!isMenuOpen);
+
+        if (readOnly) {
+            return; // Ne rien faire en mode lecture seule
+        }
+
+        if (managerOptions.length > 0) {
+            setIsMenuOpen(!isMenuOpen);
+        }
+    };
+
+    const getDisplayMessage = () => {
+        if (readOnly) return "Modification non autorisée";
+        if (managerOptions.length === 0) return "Aucun manager disponible";
+        return undefined;
     };
 
     return (
         <div className="flex justify-center items-center relative">
             <div
-                className="relative cursor-pointer"
+                className={`relative ${
+                    !readOnly && managerOptions.length > 0
+                        ? 'cursor-pointer'
+                        : readOnly
+                            ? 'cursor-not-allowed'
+                            : 'cursor-default'
+                }`}
                 onClick={toggleMenu}
                 role="button"
                 aria-haspopup="true"
                 aria-expanded={isMenuOpen}
+                title={getDisplayMessage()}
             >
                 <div
-                    className={`py-[8px] px-[16px] rounded-lg font-medium ${isUpdating ? 'opacity-50' : ''}`}
+                    className={`py-[8px] px-[16px] rounded-lg font-medium ${
+                        isUpdating ? 'opacity-50' : ''
+                    } ${readOnly ? 'opacity-75' : ''}`}
                     style={{
                         backgroundColor: '#e0f2f7', // Couleur de fond différente
                         color: '#0d47a1', // Couleur du texte différente
                     }}
                 >
                     {currentManagerName || "Pas défini"}
+                    {readOnly && (
+                        <span className="ml-1 text-xs opacity-60" title="Lecture seule">
+                            🔒
+                        </span>
+                    )}
                 </div>
             </div>
 
             {/* Menu déroulant pour sélectionner un nouveau manager */}
-            {isMenuOpen && (
-                <div className="absolute z-10 mt-2 bg-white border rounded-md shadow-lg top-full">
+            {isMenuOpen && !readOnly && managerOptions.length > 0 && (
+                <div className="absolute z-10 mt-2 bg-white border rounded-md shadow-lg top-full min-w-[200px] max-h-[200px] overflow-y-auto">
                     <ul className="py-1">
                         {managerOptions.map((manager) => (
                             <li
                                 key={manager.value}
-                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${manager.label === currentManagerName ? 'font-bold bg-gray-50' : ''}`}
+                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-center ${
+                                    manager.label === currentManagerName ? 'font-bold bg-gray-50' : ''
+                                }`}
                                 onClick={() => updateManager(manager.value, manager.label)}
                                 role="menuitem"
                             >
@@ -133,7 +171,7 @@ const ManagerRenderer: React.FC<EnhancedManagerRendererProps> = ({
                         {/* Option pour désélectionner le manager */}
                         {row?.managerId !== null && (
                             <li
-                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer`}
+                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-center border-t`}
                                 onClick={() => updateManager(null, "Pas défini")}
                                 role="menuitem"
                             >
@@ -154,13 +192,15 @@ const ManagerRenderer: React.FC<EnhancedManagerRendererProps> = ({
             )}
 
             {/* Pop-up de confirmation */}
-            <ConfirmModal
-                isOpen={isConfirmationOpen}
-                onClose={() => handleConfirmation(false)}
-                onConfirm={() => handleConfirmation(true)}
-                title="Changer le manager"
-                message={`Êtes-vous sûr de vouloir assigner ${selectedManagerName} comme manager ?`}
-            />
+            {!readOnly && (
+                <ConfirmModal
+                    isOpen={isConfirmationOpen}
+                    onClose={() => handleConfirmation(false)}
+                    onConfirm={() => handleConfirmation(true)}
+                    title="Changer le manager"
+                    message={`Êtes-vous sûr de vouloir assigner ${selectedManagerName} comme manager ?`}
+                />
+            )}
         </div>
     );
 };

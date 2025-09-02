@@ -12,7 +12,7 @@ import java.util.Set;
 @Builder
 @Setter
 @Table(name = "groupes")
-@ToString(exclude = {"users"})
+@ToString(exclude = {"users", "accessRights"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Groupe {
@@ -29,5 +29,8 @@ public class Groupe {
 
     @OneToMany(mappedBy = "groupe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonBackReference
-    private Set<User> users;
+    private Set<User> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "groupe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<AccessRight> accessRights = new HashSet<>();
 }

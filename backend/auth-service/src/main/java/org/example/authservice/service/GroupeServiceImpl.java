@@ -21,55 +21,51 @@ import java.util.stream.Collectors;
 @Transactional
 public class GroupeServiceImpl implements GroupeService {
     private final GroupeRepository groupeRepository;
+    private final AccessRightService accessRightService; // Nouveau service injecté
 
-    public GroupeServiceImpl(GroupeRepository groupeRepository) {
+    public GroupeServiceImpl(GroupeRepository groupeRepository, AccessRightService accessRightService) {
         this.groupeRepository = groupeRepository;
+        this.accessRightService = accessRightService;
     }
 
     public ResponseEntity<?> addGroupe(GroupeRequest request) {
-        // Récuperer le companyId
+        // Récupérer le companyId
         Long companyId = SecurityUtils.getCurrentCompanyId();
 
         // Vérifier si un groupe avec le même nom existe déjà
-        Groupe existingGroupe = groupeRepository.findByNameAndCompanyId(request.getName(), companyId).orElseThrow(() -> new GroupeAlreadyExistsException("Un groupe avec le même nom existe déjà."));
-//        if (existingGroupe != null) {
-//            throw new GroupeAlreadyExistsException("Un groupe avec le même nom existe déjà.");
-//        }
+        if (groupeRepository.findByNameAndCompanyId(request.getName(), companyId).isPresent()) {
+            throw new GroupeAlreadyExistsException("Un groupe avec le même nom existe déjà.");
+        }
 
         // Créer un nouveau groupe si le nom est unique
         Groupe groupe = Groupe.builder()
                 .companyId(companyId)
                 .name(request.getName())
-                .description(request.getName())  // Utilisez request.getDescription() au lieu de request.getName()
-                .users(null)
+                .description(request.getName())
                 .build();
+
         Groupe savedGroupe = groupeRepository.save(groupe);
+
+        // Créer les droits d'accès par défaut pour ce nouveau groupe
+        accessRightService.createDefaultAccessRights(savedGroupe);
+
         return ResponseEntity.ok(savedGroupe);
     }
 
     @Override
     public ResponseEntity<?> update(Long id, GroupeRequest request) {
         Groupe byName = groupeRepository.findByName(request.getName());
-        if (byName != null) {
+        if (byName != null && !byName.getId().equals(id)) { // Éviter le conflit avec lui-même
             throw new GroupeAlreadyExistsException("Un groupe avec le même nom existe.");
         }
-        Groupe groupe = groupeRepository.findById(id).orElseThrow(() -> new GroupeNotFoundException("Groupe n'existe pas"));
+
+        Groupe groupe = groupeRepository.findById(id)
+                .orElseThrow(() -> new GroupeNotFoundException("Groupe n'existe pas"));
         groupe.setName(request.getName());
+        groupe.setDescription(request.getName());
+
         return ResponseEntity.ok(groupeRepository.save(groupe));
     }
-
-//    @Override
-//    public ResponseEntity<?> getAllGroupes() {
-//        // Récuperer le companyId
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!(authentication instanceof CustomAuthenticationToken)) {
-//            return ResponseEntity.badRequest().body("Invalid authentication token.");
-//        }
-//
-//        Long companyId = extractCompanyId((CustomAuthenticationToken) authentication);
-//
-//        return ResponseEntity.ok(groupeRepository.findAllWithUserCountByCompanyId(companyId));
-//    }
 
     @Override
     public ResponseEntity<?> getAllGroupes() {
@@ -95,6 +91,10 @@ public class GroupeServiceImpl implements GroupeService {
                     groupeMap.put("id", groupe.getId());
                     groupeMap.put("description", groupe.getDescription());
                     groupeMap.put("userCount", String.valueOf(userCountByGroupId.getOrDefault(groupe.getId(), 0L)));
+
+                    // Ajouter les droits d'accès si nécessaire
+                    // groupeMap.put("accessRights", groupe.getAccessRights());
+
                     return groupeMap;
                 })
                 .collect(Collectors.toList());
@@ -109,6 +109,9 @@ public class GroupeServiceImpl implements GroupeService {
         if (!groupe.getUsers().isEmpty()) {
             throw new GroupeNotEmptyException("Groupe non vide");
         }
+
+        // Supprimer les droits d'accès associés avant de supprimer le groupe
+        accessRightService.deleteGroupAccessRights(id);
 
         groupeRepository.deleteById(id);
         return ResponseEntity.ok().build();

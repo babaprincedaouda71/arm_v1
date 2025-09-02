@@ -23,6 +23,7 @@ interface EnhancedStatusRendererProps extends GroupeRendererProps {
     apiUrl?: string;
     mutateUrl?: string;
     isTeamRequest?: boolean;
+    readOnly?: boolean; // Nouvelle prop pour désactiver les modifications
 }
 
 const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
@@ -32,7 +33,8 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
                                                                    statusOptions = [],
                                                                    apiUrl,
                                                                    mutateUrl,
-                                                                   isTeamRequest = false
+                                                                   isTeamRequest = false,
+                                                                   readOnly = false // Valeur par défaut
                                                                }) => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,13 +86,15 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
     }, [isMenuOpen, calculateDropdownPosition]);
 
     const updateStatus = useCallback(async (newStatus: string) => {
+        if (readOnly) return; // Empêcher la modification en mode lecture seule
+
         setSelectedStatus(newStatus);
         setIsConfirmationOpen(true);
         setIsMenuOpen(false); // Fermer le menu
-    }, []);
+    }, [readOnly]);
 
     const handleConfirmation = useCallback(async (confirmed: boolean, newStatus: string | null) => {
-        if (confirmed && newStatus && row?.id) {
+        if (confirmed && newStatus && row?.id && !readOnly) {
             try {
                 setIsUpdating(true);
 
@@ -121,7 +125,7 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
 
         setIsConfirmationOpen(false);
         setSelectedStatus(null);
-    }, [row?.id, apiUrl, mutateUrl]);
+    }, [row?.id, apiUrl, mutateUrl, readOnly]);
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -133,7 +137,8 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
             return;
         }
 
-        if (statusOptions.length > 0) {
+        // Ne pas ouvrir le menu en mode lecture seule
+        if (!readOnly && statusOptions.length > 0) {
             setIsMenuOpen(!isMenuOpen);
         }
     };
@@ -142,11 +147,14 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
         <div className="flex justify-center items-center relative">
             <div
                 ref={buttonRef}
-                className="relative cursor-pointer"
+                className={`relative ${!readOnly && statusOptions.length > 0 ? 'cursor-pointer' : ''} ${readOnly ? 'cursor-not-allowed' : ''}`}
                 onClick={handleClick}
+                title={readOnly ? "Modification non autorisée" : undefined}
             >
                 <div
-                    className={`flex items-center py-[8px] px-[16px] rounded-lg font-extrabold ${isUpdating ? 'opacity-50' : ''}`}
+                    className={`flex items-center py-[8px] px-[16px] rounded-lg font-extrabold ${
+                        isUpdating ? 'opacity-50' : ''
+                    } ${readOnly ? 'opacity-75' : ''}`}
                     style={{
                         color: config.color,
                         backgroundColor: config.backgroundColor
@@ -160,6 +168,11 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
                     )}
                     {config.icon && <span className="mr-2">{config.icon}</span>}
                     {config.label}
+                    {readOnly && (
+                        <span className="ml-1 text-xs opacity-60" title="Lecture seule">
+                            🔒
+                        </span>
+                    )}
                 </div>
                 {config.pill?.show && (
                     <div className="absolute -top-0 -right-2 bg-red text-white text-xs p-0.5 rounded-full">
@@ -169,7 +182,7 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
             </div>
 
             {/* Menu déroulant utilisant un Portal */}
-            {isMenuOpen && statusOptions.length > 0 && typeof document !== 'undefined' && createPortal(
+            {!readOnly && isMenuOpen && statusOptions.length > 0 && typeof document !== 'undefined' && createPortal(
                 <div
                     className="fixed z-50 bg-white border rounded-md shadow-lg min-w-[150px] max-h-[200px] overflow-y-auto"
                     style={{
@@ -181,7 +194,9 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
                         {statusOptions.map((statut) => (
                             <li
                                 key={statut}
-                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-center ${statut === value ? 'font-bold bg-gray-50' : ''}`}
+                                className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-center ${
+                                    statut === value ? 'font-bold bg-gray-50' : ''
+                                }`}
                                 onClick={() => updateStatus(statut)}
                             >
                                 {groupeConfig[statut]?.label || statut}
@@ -193,7 +208,7 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
             )}
 
             {/* Overlay pour fermer le menu */}
-            {isMenuOpen && statusOptions.length > 0 && typeof document !== 'undefined' && createPortal(
+            {!readOnly && isMenuOpen && statusOptions.length > 0 && typeof document !== 'undefined' && createPortal(
                 <div
                     className="fixed inset-0 z-40"
                     onClick={() => setIsMenuOpen(false)}
@@ -202,13 +217,15 @@ const StatusRenderer: React.FC<EnhancedStatusRendererProps> = ({
             )}
 
             {/* Modal de confirmation */}
-            <ConfirmModal
-                isOpen={isConfirmationOpen}
-                onClose={() => handleConfirmation(false, null)}
-                onConfirm={() => handleConfirmation(true, selectedStatus)}
-                title="Confirmer le changement de statut"
-                message="Êtes-vous sûr de vouloir changer le statut?"
-            />
+            {!readOnly && (
+                <ConfirmModal
+                    isOpen={isConfirmationOpen}
+                    onClose={() => handleConfirmation(false, null)}
+                    onConfirm={() => handleConfirmation(true, selectedStatus)}
+                    title="Confirmer le changement de statut"
+                    message="Êtes-vous sûr de vouloir changer le statut?"
+                />
+            )}
 
             {/* Modal des détails de la demande */}
             {isTeamRequest && row && (
